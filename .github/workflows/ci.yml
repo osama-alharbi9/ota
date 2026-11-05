@@ -27,7 +27,7 @@ jobs:
         with:
           sdk: 3.11.5
       - run: dart pub get
-      - run: dart analyze --no-fatal-warnings --no-fatal-infos packages/ota_cli packages/ota_client packages/ota_protocol
+      - run: dart analyze --no-fatal-warnings packages/ota_cli packages/ota_client packages/ota_protocol
       - run: dart test
         working-directory: cli/packages/ota_cli
       - name: The CLI starts without the Flutter toolchain
