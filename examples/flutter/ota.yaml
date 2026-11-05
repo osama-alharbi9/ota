@@ -1,0 +1,4 @@
+# Over-the-air update settings for this app.
+# Run `ota init --force` to register it on your own server.
+app_id: 00000000-0000-0000-0000-000000000000
+base_url: http://localhost:8080
