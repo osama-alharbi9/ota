@@ -7,6 +7,7 @@ import 'package:ota_cli/src/artifact_builder/artifact_builder.dart';
 import 'package:ota_cli/src/artifact_builder/build_trace_session.dart';
 import 'package:ota_cli/src/cache.dart';
 import 'package:ota_cli/src/code_push_client_wrapper.dart';
+import 'package:ota_cli/src/commands/react_native/react_native.dart';
 import 'package:ota_cli/src/commands/release/release.dart';
 import 'package:ota_cli/src/common_arguments.dart';
 import 'package:ota_cli/src/config/config.dart';
@@ -77,6 +78,10 @@ class ReleaseCommand extends OtaCommand {
         abbr: 'n',
         negatable: false,
         help: 'Validate but do not upload the release.',
+      )
+      ..addOption(
+        'entry-file',
+        help: 'The entry file of the app (React Native only).',
       )
       ..addOption(
         CommonArguments.exportOptionsPlistArg.name,
@@ -174,6 +179,8 @@ of the iOS app that is using this module. (aar and ios-framework only)''',
 
   @override
   Future<int> run() async {
+    if (isReactNativeTarget(results)) return runReactNativeRelease(results);
+
     if (results.releaseTypes.isEmpty) {
       logger.err(
         '''No platforms were provided. Use the --platforms argument to provide one or more platforms''',

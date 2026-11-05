@@ -9,6 +9,7 @@ import 'package:ota_cli/src/artifact_manager.dart';
 import 'package:ota_cli/src/cache.dart';
 import 'package:ota_cli/src/code_push_client_wrapper.dart';
 import 'package:ota_cli/src/commands/patch/patch.dart';
+import 'package:ota_cli/src/commands/react_native/react_native.dart';
 import 'package:ota_cli/src/common_arguments.dart';
 import 'package:ota_cli/src/config/config.dart';
 import 'package:ota_cli/src/deployment_track.dart';
@@ -51,6 +52,10 @@ class PatchCommand extends OtaCommand {
       ..addMultiOption(
         CommonArguments.dartDefineFromFileArg.name,
         help: CommonArguments.dartDefineFromFileArg.description,
+      )
+      ..addOption(
+        'entry-file',
+        help: 'The entry file of the app (React Native only).',
       )
       ..addMultiOption(
         'platforms',
@@ -218,6 +223,8 @@ NOTE: this is ${styleBold.wrap('not')} recommended. Asset changes cannot be incl
 
   @override
   Future<int> run() async {
+    if (isReactNativeTarget(results)) return runReactNativePatch(results);
+
     if (results.releaseTypes.isEmpty) {
       logger.err(
         '''No platforms were provided. Use the --platforms argument to provide one or more platforms''',

@@ -8,5 +8,6 @@ export 'logout_command.dart';
 export 'patch/patch.dart';
 export 'patches/patches.dart';
 export 'preview_command.dart';
+export 'react_native/react_native.dart';
 export 'release/release.dart';
 export 'releases/releases.dart';

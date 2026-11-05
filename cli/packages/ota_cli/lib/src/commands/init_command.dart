@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:ota_cli/src/code_push_client_wrapper.dart';
+import 'package:ota_cli/src/commands/react_native/react_native.dart';
 import 'package:ota_cli/src/config/config.dart';
 import 'package:ota_cli/src/doctor.dart';
 import 'package:ota_cli/src/executables/executables.dart';
@@ -50,11 +51,13 @@ class InitCommand extends OtaCommand {
       return e.exitCode.code;
     }
 
+    final reactNativeProject = ReactNativeProject.find();
+
     try {
-      if (!otaEnv.hasPubspecYaml) {
+      if (reactNativeProject == null && !otaEnv.hasPubspecYaml) {
         logger.err('''
-Could not find a "pubspec.yaml".
-Please make sure you are running "ota init" from within your Flutter project.
+Could not find a "pubspec.yaml" or a React Native "package.json".
+Please make sure you are running "ota init" from within your app.
 ''');
         return ExitCode.noInput.code;
       }
@@ -109,6 +112,14 @@ Please make sure you are running "ota init" from within your Flutter project.
     }
 
     final force = results['force'] == true;
+
+    if (reactNativeProject != null) {
+      return _initReactNative(
+        project: reactNativeProject,
+        organization: organization,
+        force: force,
+      );
+    }
 
     Set<String>? androidFlavors;
     Set<String>? iosFlavors;
@@ -318,6 +329,35 @@ Console: ${link(uri: otaEnv.consoleUri)}''',
 
     await doctor.runValidators(doctor.generalValidators, applyFixes: true);
 
+    return ExitCode.success.code;
+  }
+
+  Future<int> _initReactNative({
+    required ReactNativeProject project,
+    required Organization organization,
+    required bool force,
+  }) async {
+    if (!force && otaEnv.getOtaYamlFile(cwd: project.root).existsSync()) {
+      logger
+        ..err('A "ota.yaml" file already exists.')
+        ..info('''To register the app again, run ${lightCyan.wrap('ota init --force')}.''');
+      return ExitCode.software.code;
+    }
+
+    final displayName = (results['display-name'] as String?) ?? project.name;
+    final App app;
+    try {
+      app = await codePushClientWrapper.createApp(
+        appName: displayName,
+        organizationId: organization.id,
+      );
+    } on Exception catch (error) {
+      logger.err('$error');
+      return ExitCode.software.code;
+    }
+
+    _addOtaYamlToProject(projectRoot: project.root, appId: app.id);
+    logger.info(reactNativeNextSteps(project));
     return ExitCode.success.code;
   }
 

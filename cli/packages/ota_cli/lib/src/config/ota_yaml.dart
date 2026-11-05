@@ -25,6 +25,7 @@ class OtaYaml {
     this.baseUrl,
     this.autoUpdate,
     this.patchVerification,
+    this.channel,
   });
 
   /// Creates a [OtaYaml] from a JSON map.
@@ -61,6 +62,9 @@ class OtaYaml {
 
   /// The patch verification mode for the app.
   final PatchVerification? patchVerification;
+
+  /// The channel this build of the app follows. Defaults to `stable`.
+  final String? channel;
 }
 
 /// Extension on [OtaYaml] to get the app id for a specific flavor.
