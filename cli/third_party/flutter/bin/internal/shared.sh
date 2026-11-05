@@ -201,7 +201,11 @@ function needs_flutter_toolchain {
   [[ "$USE_TOOLCHAIN_DART" == "true" ]] && return 0
   local dir="$PWD"
   while [[ "$dir" != "/" ]]; do
-    [[ -f "$dir/pubspec.yaml" ]] && return 0
+    if [[ -f "$dir/pubspec.yaml" ]]; then
+      # Plain Dart packages have a pubspec too. Only Flutter ones need the toolchain.
+      grep -qE '^flutter:|sdk: *flutter' "$dir/pubspec.yaml"
+      return $?
+    fi
     [[ -f "$dir/package.json" ]] && return 1
     dir="$(dirname "$dir")"
   done
