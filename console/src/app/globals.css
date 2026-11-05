@@ -15,9 +15,9 @@
   --color-amber: #e2b33c;
   --color-rose: #e0637c;
 
-  --font-display: var(--font-funnel-display), system-ui, sans-serif;
-  --font-sans: var(--font-funnel-sans), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-display: system-ui, sans-serif;
+  --font-sans: system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
 
   --radius-seal: 8px;
   --radius-input: 8px;
