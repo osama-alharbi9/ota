@@ -1,0 +1,37 @@
+# Secrets
+.env
+.env.dev
+*.pem
+*.key
+*.keystore
+!debug.keystore
+
+# Dart
+.dart_tool/
+**/.dart_tool/
+
+# Node
+node_modules/
+.next/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Native builds
+**/build/
+**/.gradle/
+**/Pods/
+**/ios/generated/
+**/DerivedData/
+*.xcuserstate
+xcuserdata/
+local.properties
+.idea/
+*.iml
+
+# Machine
+.DS_Store
+.claude/
+
+# OTA build output
+captures/

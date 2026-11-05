@@ -1,0 +1,28 @@
+ota
+Licensed under Apache-2.0 OR MIT. See COPYRIGHT.
+
+This project contains code from other open-source projects. Their copyright
+notices and licenses are kept in place.
+
+cli/
+  A fork of the Shorebird CLI, release 1.6.93 (commit c4e5f418).
+  Copyright Code Town, Inc. Apache-2.0 OR MIT.
+  https://github.com/shorebirdtech/shorebird
+
+cli/third_party/flutter/
+  Copyright The Flutter Authors. BSD-3-Clause, see its LICENSE file.
+
+cli/packages/scoped_deps/, cli/packages/flutter_version_resolver/
+  See the LICENSE file in each package.
+
+The Flutter toolchain is built from forks that live in their own repositories:
+
+  Flutter (framework and engine)
+  Shorebird's public fork at c2c56ab2, BSD-3-Clause.
+  https://github.com/shorebirdtech/flutter
+
+  Updater and patch tool
+  Shorebird's public updater at 185280e0, Apache-2.0 OR MIT.
+  https://github.com/shorebirdtech/updater
+
+Shorebird is a trademark of its owner. This project is not affiliated with it.
