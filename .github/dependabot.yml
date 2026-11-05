@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: monthly
+  - package-ecosystem: npm
+    directories: [/server, /console, /react-native]
+    target-branch: dev
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
