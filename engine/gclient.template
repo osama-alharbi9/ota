@@ -2,12 +2,15 @@
 # Copied to <flutter checkout>/.gclient by engine/scripts/setup.sh.
 # DEPS on ota/stable already points at stock Dart and our updater mirror, so
 # no custom_deps override is needed any more (CLEANROOM T1-09).
+# updater_rev below replaces the DEPS pin, which is not in the public ota-updater.
 solutions = [
   {
     "custom_deps": {},
     "custom_vars": {
       # Do not install the fork's git hooks into our checkout.
       "setup_githooks": False,
+      # Head of ota/stable in ota-updater.
+      "updater_rev": "64e361125fab306d3a69d6dee4c430cd2de3baf7",
     },
     "deps_file": "DEPS",
     "managed": False,
