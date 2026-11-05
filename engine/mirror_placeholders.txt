@@ -1,0 +1,17 @@
+# Paths our artifact server answers with a placeholder zip (one file,
+# OTA_PLACEHOLDER.txt). Only for artifacts flutter_tools insists on downloading
+# but never uses for an Android release build. Every rule needs a reason line above it and an
+# entry in CLEANROOM.md. Added only after the server's MISS log shows the path.
+# One regex per line, matched against the request path.
+
+# flutter_patched_sdk.zip: the NON-product kernel platform (debug/profile builds,
+# flutter test). flutter_tools downloads it with every universal artifact set;
+# release builds read flutter_patched_sdk_product.zip, which we build and serve.
+# Building this one needs a debug host engine (CLEANROOM T1-17).
+^/flutter_infra_release/flutter/[0-9a-f]{40}/flutter_patched_sdk\.zip$
+
+# android-<abi>-profile/darwin-x64.zip: gen_snapshot for PROFILE-mode Android
+# builds. flutter_tools downloads the profile and release gen_snapshots for all
+# three ABIs whatever mode is built; OTA builds release engines only, and a
+# release build uses android-<abi>-release/darwin-x64.zip (CLEANROOM T1-17).
+^/flutter_infra_release/flutter/[0-9a-f]{40}/android-(arm|arm64|x64)-profile/darwin-x64\.zip$

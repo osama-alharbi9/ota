@@ -1,0 +1,14 @@
+# Paths our artifact server may proxy to https://storage.googleapis.com.
+# Only engine-INDEPENDENT assets that Google publishes for stock Flutter.
+# Nothing keyed by an engine hash may appear here; those must be built by us.
+# One regex per line, matched against the request path.
+
+# Material icon fonts (flutter_tools MaterialFonts, keyed by a font version hash).
+^/flutter_infra_release/flutter/fonts/[0-9a-f]+/fonts\.zip$
+# Gradle wrapper (flutter_tools GradleWrapper, keyed by a wrapper version hash).
+^/flutter_infra_release/gradle-wrapper/[0-9a-f]+/gradle-wrapper\.tgz$
+# iOS USB tools (libimobiledevice, libusbmuxd, libplist, openssl, ios-deploy, ...):
+# open-source third-party binaries Google builds for stock Flutter, keyed by their
+# own version hash, not an engine hash. flutter_tools downloads them on every macOS
+# host as part of its universal set; Android builds do not use them.
+^/flutter_infra_release/ios-usb-dependencies/[\w.-]+/[0-9a-f]+/[\w.-]+\.zip$

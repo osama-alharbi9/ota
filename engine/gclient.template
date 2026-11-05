@@ -1,0 +1,18 @@
+# gclient config for building OTA's branch of the Flutter fork.
+# Copied to <flutter checkout>/.gclient by engine/scripts/setup.sh.
+# DEPS on ota/stable already points at stock Dart and our updater mirror, so
+# no custom_deps override is needed any more (CLEANROOM T1-09).
+solutions = [
+  {
+    "custom_deps": {},
+    "custom_vars": {
+      # Do not install the fork's git hooks into our checkout.
+      "setup_githooks": False,
+    },
+    "deps_file": "DEPS",
+    "managed": False,
+    "name": ".",
+    "safesync_url": "",
+    "url": "https://github.com/osama-alharbi9/ota-flutter.git",
+  },
+]
