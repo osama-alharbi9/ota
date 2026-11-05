@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/* The console is dark by default: night ground, ink text, slate panels. */
+@theme {
+  --color-night: #050507;
+  --color-paper: #f3f0e8;
+  --color-ink: #ededf5;
+  --color-slate: #141420;
+  --color-indigo: #1b1f5a;
+  --color-cobalt: #1f4fd1;
+  --color-cobalt-text: #7d9bff;
+  --color-violet: #6f3fd6;
+  --color-copper: #c2703a;
+  --color-jade: #2dbe8a;
+  --color-amber: #e2b33c;
+  --color-rose: #e0637c;
+
+  --font-display: var(--font-funnel-display), system-ui, sans-serif;
+  --font-sans: var(--font-funnel-sans), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --radius-seal: 8px;
+  --radius-input: 8px;
+  --radius-button: 10px;
+  --radius-card: 14px;
+  --radius-panel: 18px;
+}
+
+/* Base styles live in the base layer so utility classes can override them. */
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--color-night);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 22px;
+    font-weight: 400;
+  }
+
+  /* Focus ring: 2 px cobalt, 2 px offset. */
+  :focus-visible {
+    outline: 2px solid var(--color-cobalt);
+    outline-offset: 2px;
+  }
+
+  a {
+    color: var(--color-cobalt-text);
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+
+  ::selection {
+    background: var(--color-indigo);
+  }
+}
