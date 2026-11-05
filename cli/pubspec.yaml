@@ -1,0 +1,15 @@
+name: _
+publish_to: none
+environment:
+  sdk: ^3.9.0
+workspace:
+  - packages/dex
+  - packages/flutter_version_resolver
+  - packages/scoped_deps
+  - packages/ota_build_trace
+  - packages/ota_cli
+  - packages/ota_client
+  - packages/ota_protocol
+
+dev_dependencies:
+  very_good_analysis: ^10.2.0
