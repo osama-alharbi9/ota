@@ -1,0 +1,118 @@
+# Checks every pull request and push. Publishing is in publish.yml.
+name: ci
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  cli:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cli
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.11.5
+      - run: dart pub get
+      - run: dart analyze --no-fatal-warnings --no-fatal-infos packages/ota_cli packages/ota_client packages/ota_protocol
+      - run: dart test
+        working-directory: cli/packages/ota_cli
+      - name: The CLI starts without the Flutter toolchain
+        run: bin/ota --version
+
+  server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: server/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: server/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prisma generate
+      - run: pnpm exec tsc --noEmit -p tsconfig.build.json
+      - run: pnpm exec nest build
+
+  console:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: console
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: console/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: console/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm exec eslint src
+      - run: pnpm build
+        env:
+          API_URL: http://localhost:8080
+
+  react-native-android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/react-native
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Typecheck the SDK
+        run: npm install --no-package-lock --no-audit --no-fund && npm run typecheck
+        working-directory: react-native
+      - run: npm ci
+      - name: Build the example, which compiles the SDK
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+        working-directory: examples/react-native/android
+
+  react-native-ios:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: examples/react-native
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: pod install
+        working-directory: examples/react-native/ios
+      - name: Build the example, which compiles the SDK
+        run: >
+          xcodebuild -quiet -workspace OtaExample.xcworkspace -scheme OtaExample
+          -configuration Release -sdk iphonesimulator
+          -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+        working-directory: examples/react-native/ios
