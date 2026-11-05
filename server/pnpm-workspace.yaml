@@ -1,0 +1,5 @@
+# pnpm settings (pnpm 10+ reads them here, not from package.json)
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  "prisma": true

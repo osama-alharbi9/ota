@@ -1,0 +1,219 @@
+// OTA platform schema. Mirrors server/lib/src/db.dart (the Dart reference server)
+// plus users, organizations, memberships, API keys and an audit log.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int          @id @default(autoincrement())
+  email        String       @unique
+  passwordHash String       @map("password_hash")
+  displayName  String?      @map("display_name")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  memberships  Membership[]
+  apiKeys      ApiKey[]
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+enum OrganizationType {
+  personal
+  team
+}
+
+enum Role {
+  owner
+  admin
+  appManager
+  developer
+  viewer
+}
+
+model Organization {
+  id          Int              @id @default(autoincrement())
+  name        String
+  type        OrganizationType @default(personal)
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at")
+  memberships Membership[]
+  apps        App[]
+
+  @@map("organizations")
+}
+
+model Membership {
+  userId         Int          @map("user_id")
+  organizationId Int          @map("organization_id")
+  role           Role         @default(developer)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@id([userId, organizationId])
+  @@map("memberships")
+}
+
+model ApiKey {
+  id         Int       @id @default(autoincrement())
+  userId     Int       @map("user_id")
+  name       String
+  keyHash    String    @unique @map("key_hash")
+  keyPrefix  String    @map("key_prefix")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  lastUsedAt DateTime? @map("last_used_at")
+  revokedAt  DateTime? @map("revoked_at")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+model App {
+  id             String       @id
+  displayName    String       @map("display_name")
+  organizationId Int          @map("organization_id")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  channels       Channel[]
+  releases       Release[]
+
+  @@map("apps")
+}
+
+model Channel {
+  id            Int            @id @default(autoincrement())
+  appId         String         @map("app_id")
+  name          String
+  app           App            @relation(fields: [appId], references: [id], onDelete: Cascade)
+  patchChannels PatchChannel[]
+
+  @@unique([appId, name])
+  @@map("channels")
+}
+
+model Release {
+  id               Int               @id @default(autoincrement())
+  appId            String            @map("app_id")
+  version          String
+  flutterRevision  String            @map("flutter_revision")
+  flutterVersion   String?           @map("flutter_version")
+  displayName      String?           @map("display_name")
+  notes            String?
+  platformStatuses Json              @default("{}") @map("platform_statuses")
+  metadata         Json              @default("{}")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @default(now()) @updatedAt @map("updated_at")
+  app              App               @relation(fields: [appId], references: [id], onDelete: Cascade)
+  artifacts        ReleaseArtifact[]
+  patches          Patch[]
+
+  @@unique([appId, version])
+  @@map("releases")
+}
+
+model ReleaseArtifact {
+  id              Int      @id @default(autoincrement())
+  releaseId       Int      @map("release_id")
+  arch            String
+  platform        String
+  hash            String
+  size            BigInt
+  filename        String?
+  canSideload     Boolean  @default(false) @map("can_sideload")
+  podfileLockHash String?  @map("podfile_lock_hash")
+  storageKey      String   @map("storage_key")
+  uploadToken     String   @unique @map("upload_token")
+  downloadToken   String   @unique @map("download_token")
+  uploaded        Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  release         Release  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+
+  @@unique([releaseId, arch, platform])
+  @@map("release_artifacts")
+}
+
+model Patch {
+  id           Int             @id @default(autoincrement())
+  releaseId    Int             @map("release_id")
+  number       Int
+  notes        String?
+  metadata     Json            @default("{}")
+  isRolledBack Boolean         @default(false) @map("is_rolled_back")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  release      Release         @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  artifacts    PatchArtifact[]
+  channels     PatchChannel[]
+
+  @@unique([releaseId, number])
+  @@map("patches")
+}
+
+model PatchArtifact {
+  id              Int      @id @default(autoincrement())
+  patchId         Int      @map("patch_id")
+  arch            String
+  platform        String
+  hash            String
+  hashSignature   String?  @map("hash_signature")
+  size            BigInt
+  podfileLockHash String?  @map("podfile_lock_hash")
+  storageKey      String   @map("storage_key")
+  uploadToken     String   @unique @map("upload_token")
+  downloadToken   String   @unique @map("download_token")
+  uploaded        Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  patch           Patch    @relation(fields: [patchId], references: [id], onDelete: Cascade)
+
+  @@unique([patchId, arch, platform])
+  @@map("patch_artifacts")
+}
+
+model PatchChannel {
+  patchId    Int      @map("patch_id")
+  channelId  Int      @map("channel_id")
+  promotedAt DateTime @default(now()) @map("promoted_at")
+  patch      Patch    @relation(fields: [patchId], references: [id], onDelete: Cascade)
+  channel    Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@id([patchId, channelId])
+  @@map("patch_channels")
+}
+
+model PatchEvent {
+  id         BigInt   @id @default(autoincrement())
+  receivedAt DateTime @default(now()) @map("received_at")
+  appId      String?  @map("app_id")
+  event      Json
+
+  @@index([appId, receivedAt])
+  @@map("patch_events")
+}
+
+model PatchCheck {
+  id         BigInt   @id @default(autoincrement())
+  receivedAt DateTime @default(now()) @map("received_at")
+  appId      String?  @map("app_id")
+  request    Json
+  response   Json
+
+  @@index([appId, receivedAt])
+  @@map("patch_checks")
+}
+
+model AuditLog {
+  id             BigInt   @id @default(autoincrement())
+  at             DateTime @default(now())
+  userId         Int?     @map("user_id")
+  organizationId Int?     @map("organization_id")
+  action         String
+  target         Json
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, at])
+  @@map("audit_log")
+}
