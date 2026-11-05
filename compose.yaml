@@ -1,0 +1,74 @@
+# The ota server: API, console, Postgres and S3 storage. Settings come from .env
+# (copy .env.example). Run it with `docker compose up -d`. compose.dev.yaml adds
+# what local development needs; docs/environments.md explains both.
+name: ota
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ota
+      POSTGRES_USER: ota
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ota -d ota"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?set S3_ACCESS_KEY in .env}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?set S3_SECRET_KEY in .env}
+    volumes:
+      - miniodata:/data
+
+  api:
+    image: ${OTA_SERVER_IMAGE:-ghcr.io/osama-alharbi9/ota-server:latest}
+    build: ./server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    environment:
+      PORT: "8080"
+      PUBLIC_URL: ${PUBLIC_URL:?set PUBLIC_URL in .env}
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3100}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      BOOTSTRAP_EMAIL: ${BOOTSTRAP_EMAIL:-}
+      BOOTSTRAP_PASSWORD: ${BOOTSTRAP_PASSWORD:-}
+      API_TOKEN: ${API_TOKEN:-}
+      DB_HOST: postgres
+      DB_NAME: ota
+      DATABASE_URL: postgresql://ota:${DB_PASSWORD}@postgres:5432/ota
+      DB_USER: ota
+      DB_PASSWORD: ${DB_PASSWORD}
+      S3_ENDPOINT: minio
+      S3_PORT: "9000"
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_BUCKET: ota-artifacts
+    ports:
+      - "${API_PORT:-8080}:8080"
+
+  console:
+    image: ${OTA_CONSOLE_IMAGE:-ghcr.io/osama-alharbi9/ota-console:latest}
+    build: ./console
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      API_URL: http://api:8080
+    ports:
+      - "127.0.0.1:${CONSOLE_PORT:-3100}:3000"
+
+volumes:
+  pgdata:
+  miniodata:

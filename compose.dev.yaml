@@ -1,0 +1,24 @@
+# Local development overlay:
+#   docker compose -f compose.yaml -f compose.dev.yaml --env-file .env.dev up -d --build
+# Builds from this checkout and opens the database and storage ports, so you can
+# also run server/ or console/ directly.
+name: ota-dev
+services:
+  postgres:
+    restart: "no"
+    ports:
+      - "127.0.0.1:55432:5432"
+
+  minio:
+    restart: "no"
+    ports:
+      - "127.0.0.1:59000:9000"
+      - "127.0.0.1:59001:9001"
+
+  api:
+    image: ota-server:dev
+    restart: "no"
+
+  console:
+    image: ota-console:dev
+    restart: "no"
