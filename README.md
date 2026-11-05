@@ -1,5 +1,7 @@
 # ota
 
+[![ci](https://github.com/osama-alharbi9/ota/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/osama-alharbi9/ota/actions/workflows/ci.yml)
+
 Self-hosted over-the-air updates for React Native and Flutter apps. Fix a bug, run one command, and it reaches phones on their next launch, from a server you own.
 
 | | Android | iOS |
