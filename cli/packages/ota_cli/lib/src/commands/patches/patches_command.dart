@@ -8,6 +8,7 @@ class PatchesCommand extends OtaCommand {
   /// {@macro patches_command}
   PatchesCommand() {
     addSubcommand(PromoteCommand());
+    addSubcommand(RollbackCommand());
     addSubcommand(SetTrackCommand());
   }
 

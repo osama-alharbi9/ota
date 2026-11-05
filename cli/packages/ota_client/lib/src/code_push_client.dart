@@ -362,6 +362,28 @@ class CodePushClient {
     return PrivateUser.fromJson(body);
   }
 
+  /// Rolls a patch back, or restores it when [rolledBack] is false. Devices drop
+  /// a rolled back patch the next time they check for updates.
+  Future<void> setPatchRolledBack({
+    required String appId,
+    required String releaseVersion,
+    required int patchNumber,
+    required bool rolledBack,
+  }) async {
+    final action = rolledBack ? 'rollback' : 'unrollback';
+    final version = Uri.encodeComponent(releaseVersion);
+    final response = await _httpClient.post(
+      Uri.parse(
+        '$hostedUri/api/admin/apps/$appId/releases/$version/patches/'
+        '$patchNumber/$action',
+      ),
+    );
+
+    if (!response.isSuccess) {
+      throw _parseErrorResponse(response.statusCode, response.body);
+    }
+  }
+
   /// Delete the app with the provided [appId].
   Future<void> deleteApp({required String appId}) async {
     final response = await _httpClient.delete(Uri.parse('$_v1/apps/$appId'));
