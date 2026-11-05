@@ -1,0 +1,53 @@
+{
+  "name": "ota-react-native",
+  "version": "0.1.0",
+  "description": "Over-the-air updates for React Native apps, from your own ota server",
+  "license": "(MIT OR Apache-2.0)",
+  "homepage": "https://github.com/osama-alharbi9/ota/tree/main/react-native",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/osama-alharbi9/ota.git",
+    "directory": "react-native"
+  },
+  "keywords": ["react-native", "ota", "code-push", "over-the-air", "self-hosted"],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "react-native": "src/index.ts",
+  "files": [
+    "src",
+    "android/build.gradle",
+    "android/src",
+    "ios/*.h",
+    "ios/*.m",
+    "ios/*.mm",
+    "ota-react-native.podspec",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": ">=0.76.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "react-native": "^0.88.1",
+    "typescript": "^5.8.3"
+  },
+  "codegenConfig": {
+    "name": "OtaSpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "dev.ota.reactnative"
+    },
+    "ios": {
+      "modulesProvider": {
+        "Ota": "OtaModule"
+      }
+    }
+  }
+}
