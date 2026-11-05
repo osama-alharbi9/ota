@@ -1,0 +1,50 @@
+apply plugin: "com.android.library"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+
+def safeExtGet(name, fallback) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : fallback
+}
+
+// The app's ota.yaml ships inside the app as an asset, so there is one file to edit.
+def otaYaml = new File(rootProject.projectDir.parentFile, "ota.yaml")
+def generatedAssets = layout.buildDirectory.dir("generated/ota/assets").get().asFile
+def copyOtaYaml = tasks.register("copyOtaYaml", Copy) {
+  from(otaYaml)
+  into(generatedAssets)
+}
+
+android {
+  namespace "dev.ota.reactnative"
+  compileSdkVersion safeExtGet("compileSdkVersion", 36)
+
+  defaultConfig {
+    minSdkVersion safeExtGet("minSdkVersion", 24)
+    targetSdkVersion safeExtGet("targetSdkVersion", 36)
+  }
+
+  sourceSets {
+    main {
+      assets.srcDir(generatedAssets)
+    }
+  }
+}
+
+tasks.named("preBuild") {
+  dependsOn(copyOtaYaml)
+}
+
+repositories {
+  mavenCentral()
+  google()
+}
+
+dependencies {
+  implementation "com.facebook.react:react-android"
+}
+
+react {
+  jsRootDir = file("../src")
+  libraryName = "OtaSpec"
+  codegenJavaPackageName = "dev.ota.reactnative"
+}
