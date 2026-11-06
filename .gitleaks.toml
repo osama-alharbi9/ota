@@ -1,0 +1,9 @@
+[extend]
+useDefault = true
+
+# Checked by hand: pod checksums, and doc comments that describe PEM headers.
+[allowlist]
+paths = [
+  '''examples/react-native/ios/Podfile\.lock''',
+  '''cli/packages/ota_cli/lib/src/code_signer\.dart''',
+]

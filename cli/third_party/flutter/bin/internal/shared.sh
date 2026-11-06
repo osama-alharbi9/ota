@@ -98,6 +98,10 @@ function _lock () {
 # closed. The mkdir lock is released via an exit trap from the subshell that
 # deletes the lock directory.
 function _wait_for_lock () {
+  # Already held by this subshell: shlock and mkdir would wait on themselves forever.
+  if [[ -n "$HOLDS_UPGRADE_LOCK" ]]; then
+    return 0
+  fi
   FLUTTER_UPGRADE_LOCK="$OTA_ROOT/bin/cache/.upgrade_lock"
   local waiting_message_displayed
   while ! _lock "$FLUTTER_UPGRADE_LOCK"; do
@@ -117,6 +121,7 @@ function _wait_for_lock () {
   unset waiting_message_displayed
   # If the lock file is acquired, make sure that it is removed on exit.
   trap _rmlock INT TERM EXIT
+  HOLDS_UPGRADE_LOCK=1
 }
 
 # This function is always run in a subshell. Running the function in a subshell

@@ -16,6 +16,15 @@ permissions:
   contents: read
 
 jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for secrets
+        run: >
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest detect
+          --source=/repo --config=/repo/.gitleaks.toml --no-git --no-banner --redact
+
   cli:
     runs-on: ubuntu-latest
     defaults:
